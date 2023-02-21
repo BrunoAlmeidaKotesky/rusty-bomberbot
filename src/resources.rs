@@ -14,10 +14,13 @@ pub struct WinSize {
     pub h: f32,
 }
 
-#[derive(Resource)]
+#[derive(AssetCollection, Resource)]
 pub struct GameTextures {
+    #[asset(path = "textures/bomberman_base.png")]
     pub player: Handle<Image>,
+    #[asset(path = "textures/bomberman_bomb.png")]
     pub player_bomb: Handle<Image>,
+    #[asset(path = "textures/explosion.png")]
     pub explosion: Handle<TextureAtlas>,
 }
 

@@ -3,7 +3,7 @@ use crate::{
     resources::{FontAssets, LocalHandles},
     AppState, GGRSConfig,
 };
-use bevy::{app::AppExit, prelude::*};
+use bevy::prelude::*;
 use bevy_ggrs::{
     ggrs::{PlayerType, SessionBuilder},
     Session as SessionType,

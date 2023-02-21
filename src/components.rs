@@ -1,7 +1,8 @@
 use bevy::{
-    prelude::{Component, Entity, Vec3},
+    prelude::{Component, Vec3},
     time::{Timer, TimerMode},
 };
+use bevy_ggrs::ggrs::{Config};
 
 #[derive(Component)]
 pub struct FuseTime {
@@ -59,3 +60,12 @@ impl Default for BombBag {
 
 #[derive(Component)]
 pub struct RoundEntity;
+
+pub struct GGRSConfig;
+impl Config for GGRSConfig {
+    // 4-directions + fire fits easily in a single byte
+    type Input = u8;
+    type State = u8;
+    // Matchbox' WebRtcSocket addresses are strings
+    type Address = String;
+}

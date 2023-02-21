@@ -6,7 +6,6 @@ mod constants;
 mod input;
 mod player;
 mod resources;
-mod server;
 mod menu;
 
 use bevy::{
@@ -15,18 +14,15 @@ use bevy::{
 };
 use bevy_asset_loader::prelude::{LoadingStateAppExt, LoadingState};
 use bevy_ecs_ldtk::prelude::*;
-use bevy_ggrs::{GGRSPlugin, Session as SessionType, ggrs::P2PSession};
+use bevy_ggrs::{GGRSPlugin};
 use bomb::{
-    bomb_explosion_system, explosion_animation_system, explosion_to_spawn_system,
-    get_explosion_texture,
+    explosion_animation_system, explosion_to_spawn_system
 };
 use camera::CameraPlugin;
 use checksum::{Checksum, checksum_players_system};
-use components::RoundEntity;
-use constants::{PLAYER_BOMB_SPRITE, PLAYER_SPRITE};
+use components::{RoundEntity, GGRSConfig};
 use player::{move_players, spawn_players};
 use resources::{GameTextures, FontAssets, LocalHandles, Session};
-use server::{GGRSConfig};
 use std::time::Duration;
 
 fn main() {
@@ -34,31 +30,29 @@ fn main() {
 
     init_ggrsp_plugin(&mut app);
     app.add_plugin(CameraPlugin)
-        .add_startup_system(load_textures_system)
+        .add_state(AppState::AssetLoading)
+        .add_startup_system(load_ldtk_levels)
         .add_loading_state(
             LoadingState::new(AppState::AssetLoading)
             .continue_to_state(AppState::MenuMain)
             .with_collection::<FontAssets>()
+            .with_collection::<GameTextures>()
         )
         .add_plugin(LdtkPlugin)
-        //.add_startup_system(start_matchbox_system)
-        //.add_startup_system_to_stage(StartupStage::PostStartup, player_spawn_system)
         .insert_resource(LevelSelection::Index(0))
-        .register_ldtk_entity::<MyBundle>("MyEntityIdentifier")
-        .add_system(bomb_explosion_system)
+        .register_ldtk_entity::<LDTKBundle>("MyEntityIdentifier")
         .add_plugin(LogDiagnosticsPlugin {
             wait_duration: Duration::from_secs(10),
             debug: false,
             filter: None,
         })
         .add_plugin(FrameTimeDiagnosticsPlugin::default())
-        //.add_system(wait_for_players)
-        .add_system(explosion_animation_system)
-        .add_system(explosion_to_spawn_system)
-
-        .add_state(AppState::AssetLoading)
         // main menu
-        .add_system_set(SystemSet::on_enter(AppState::MenuMain).with_system(menu::main::setup_ui))
+        .add_system_set(SystemSet::on_enter(AppState::MenuMain)
+            .with_system(menu::main::setup_ui)
+            .with_system(explosion_animation_system)
+            .with_system(explosion_to_spawn_system)
+        )
         .add_system_set(
             SystemSet::on_update(AppState::MenuMain)
                 //.with_system(menu::main::btn_visuals)
@@ -131,18 +125,7 @@ fn init_ggrsp_plugin(app: &mut App) {
         .build(app);
 }
 
-fn load_textures_system(
-    mut commands: Commands,
-    assets: Res<AssetServer>,
-    texture_atlas: ResMut<Assets<TextureAtlas>>,
-) {
-    let explosion = get_explosion_texture(&assets, texture_atlas);
-    let game_textures = GameTextures {
-        player: assets.load(PLAYER_SPRITE),
-        player_bomb: assets.load(PLAYER_BOMB_SPRITE),
-        explosion,
-    };
-    commands.insert_resource(game_textures);
+fn load_ldtk_levels(mut commands: Commands, assets: Res<AssetServer>) {
     commands.spawn(LdtkWorldBundle {
         ldtk_handle: assets.load("levels/Bomberboy.ldtk"),
         ..default()
@@ -150,7 +133,7 @@ fn load_textures_system(
 }
 
 #[derive(Bundle, LdtkEntity)]
-pub struct MyBundle {
+pub struct LDTKBundle {
     #[sprite_sheet_bundle]
     #[bundle]
     sprite_bundle: SpriteSheetBundle,

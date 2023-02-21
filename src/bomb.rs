@@ -1,8 +1,7 @@
 use crate::{
-    components::{Bomb, BombBag, Explosion, ExplosionTimer, ExplosionToSpawn, FuseTime, Player},
-    constants::{EXPLOSION_SPRITE, INPUT_FIRE},
-    resources::GameTextures,
-    server::GGRSConfig,
+    components::{Bomb, BombBag, Explosion, ExplosionTimer, ExplosionToSpawn, FuseTime, Player, GGRSConfig},
+    constants::{INPUT_FIRE},
+    resources::GameTextures
 };
 use bevy::prelude::*;
 use bevy_ggrs::{ggrs, PlayerInputs};
@@ -60,19 +59,6 @@ pub fn bomb_explosion_system(
             commands.spawn(ExplosionToSpawn(Vec3::new(50., 50., 0.)));
         }
     }
-}
-
-//Explosion Texture handling
-
-pub fn get_explosion_texture(
-    assets: &Res<AssetServer>,
-    mut texture_atlas: ResMut<Assets<TextureAtlas>>,
-) -> Handle<TextureAtlas> {
-    let explosion_texture = assets.load(EXPLOSION_SPRITE);
-    let explosion_atlas =
-        TextureAtlas::from_grid(explosion_texture, Vec2::new(64., 64.), 4, 4, None, None);
-    let explosion = texture_atlas.add(explosion_atlas);
-    explosion
 }
 
 pub fn explosion_to_spawn_system(

@@ -1,53 +1,13 @@
 use crate::checksum::Checksum;
-use crate::components::{BombBag, Player, RoundEntity};
+use crate::components::{BombBag, Player, RoundEntity, GGRSConfig};
 use crate::constants::MAX_PLAYERS;
 use crate::input::control_direction;
 use crate::resources::GameTextures;
-use crate::server::GGRSConfig;
 use bevy::math::Vec3Swizzles;
 use bevy::prelude::*;
 use bevy_ggrs::ggrs::InputStatus;
 use bevy_ggrs::PlayerInputs;
 use bevy_ggrs::{Rollback, RollbackIdProvider};
-
-/**@deprecated */
-pub fn player_spawn_system(
-    mut commands: Commands,
-    game_texture: Res<GameTextures>,
-    mut rip: ResMut<RollbackIdProvider>,
-) {
-    let id = rip.next_id();
-    commands.spawn((
-        SpriteBundle {
-            transform: Transform {
-                translation: Vec3::new(-10., 0., 100.),
-                scale: Vec3::new(0.05, 0.05, 0.5),
-                ..default()
-            }, // <-- new
-            texture: game_texture.player.clone(),
-            ..default()
-        },
-        Player { handle: 0 },
-        BombBag::default(),
-        Rollback::new(id),
-    ));
-
-    let id = rip.next_id();
-    commands.spawn((
-        SpriteBundle {
-            transform: Transform {
-                translation: Vec3::new(10., 0., 100.),
-                scale: Vec3::new(0.05, 0.05, 0.5),
-                ..default()
-            },
-            texture: game_texture.player.clone(),
-            ..default()
-        },
-        Player { handle: 1 },
-        BombBag::default(),
-        Rollback::new(id),
-    ));
-}
 
 pub fn spawn_players(
     mut commands: Commands,
