@@ -6,7 +6,7 @@ use matchbox_socket::WebRtcSocket;
 use crate::{
     constants::MAX_PLAYERS,
     resources::{ConnectData, FontAssets, LocalHandles, Session},
-    AppState, GGRSConfig,
+    components::{AppState, GGRSConfig},
 };
 
 #[derive(Component)]

@@ -1,6 +1,6 @@
 use crate::{
     resources::{ConnectData, FontAssets, LobbyID},
-    AppState,
+    components::{AppState},
 };
 use bevy::prelude::*;
 
@@ -23,12 +23,10 @@ pub struct LobbyCodeText;
 pub fn setup_ui(mut commands: Commands, font_assets: Res<FontAssets>) {
     // lobby id resource
     commands.insert_resource(LobbyID("".to_owned()));
-    // ui camera
-    commands.spawn((MenuOnlineUI));
-
     // root node
-    commands
-        .spawn(NodeBundle {
+    commands.spawn((
+        MenuOnlineUI,
+        NodeBundle {
             style: Style {
                 position_type: PositionType::Absolute,
                 position: UiRect::all(Val::Px(0.)),
@@ -40,8 +38,8 @@ pub fn setup_ui(mut commands: Commands, font_assets: Res<FontAssets>) {
                 ..default()
             },
             ..default()
-        })
-        .with_children(|parent| {
+        }
+    )).with_children(|parent| {
             // lobby id text
             parent.spawn((
                 TextBundle {
