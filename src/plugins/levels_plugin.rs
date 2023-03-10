@@ -1,7 +1,7 @@
-use bevy::prelude::*;
+use bevy::{prelude::*};
 use bevy_ecs_ldtk::prelude::*;
 
-use crate::components::{AppState, Player};
+use crate::{components::{AppState, Player}, resources::{LDTKBundle, LocalHandles, LobbyID}};
 
 fn load_ldtk_levels(mut commands: Commands, assets: Res<AssetServer>) {
     info!("Loading ldtk levels");
@@ -30,7 +30,7 @@ fn load_ldtk_levels(mut commands: Commands, assets: Res<AssetServer>) {
             transform: Transform::from_translation(Vec3::new(
                 i as f32 - MAP_SIZE as f32 / 2.,
                 0.,
-                10.,
+                1.,
             )),
             sprite: Sprite {
                 color: Color::rgb(0.27, 0.27, 0.27),
@@ -42,6 +42,12 @@ fn load_ldtk_levels(mut commands: Commands, assets: Res<AssetServer>) {
     }
     commands.spawn(LdtkWorldBundle {
         ldtk_handle: assets.load::<LdtkAsset, &str>("levels/Bomberboy.ldtk"),
+        transform: Transform {
+            translation: Vec3::new(0., 0., 111.),
+            scale: //Should be small 
+                Vec3::new(0.05, 0.05, 0.05),
+            ..default()
+        },
         ..default()
     });
 }
@@ -49,37 +55,32 @@ fn load_ldtk_levels(mut commands: Commands, assets: Res<AssetServer>) {
 pub fn camera_fit_inside_current_level(
     mut camera_query: Query<
         (
-            &mut bevy::render::camera::OrthographicProjection,
+            &mut OrthographicProjection,
             &mut Transform,
         ),
         Without<Player>,
     >,
-    player_query: Query<&Transform, With<Player>>,
+    player_query: Query<(&Transform, &Player)>,
     level_query: Query<
         (&Transform, &Handle<LdtkLevel>),
         (Without<OrthographicProjection>, Without<Player>),
     >,
     level_selection: Res<LevelSelection>,
     ldtk_levels: Res<Assets<LdtkLevel>>,
+    player_handle: Option<Res<LocalHandles>>,
+    current_lobby: Option<Res<LobbyID>>,
 ) {
     const ASPECT_RATIO: f32 = 16. / 9.;
+    info!("Player handle: {:?} and current lobby {:?}, Player Query: {:?}", player_handle, current_lobby, player_query);
     let player_translation = match player_query.get_single() {
-        Ok(Transform {
-            translation: player_translation,
-            ..
-        }) => {
-            // faça algo com player_translation
-            player_translation
+        Ok((transform, player)) => {
+            transform.translation
         }
         Err(e) => {
-            // trate o erro de acordo com sua necessidade
-            // por exemplo, retornando um valor padrão ou lançando uma exceção
             warn!("Error getting player transform: {}", e);
             return;
         }
     };
-
-    let player_translation = *player_translation;
 
     let (mut orthographic_projection, mut camera_transform) = camera_query.single_mut();
 
@@ -119,13 +120,6 @@ pub fn camera_fit_inside_current_level(
     }
 }
 
-#[derive(Bundle, LdtkEntity)]
-pub struct LDTKBundle {
-    #[sprite_sheet_bundle]
-    #[bundle]
-    sprite_bundle: SpriteSheetBundle,
-}
-
 pub struct LevelsPlugin;
 impl Plugin for LevelsPlugin {
     fn build(&self, app: &mut App) {
@@ -133,10 +127,11 @@ impl Plugin for LevelsPlugin {
         .with_system(load_ldtk_levels)
         .with_system(camera_fit_inside_current_level);
 
-        app.insert_resource(LevelSelection::Index(0))
+        app
             .add_plugin(LdtkPlugin)
-            .register_ldtk_entity::<LDTKBundle>("MyEntityIdentifier")
+            .register_ldtk_entity::<LDTKBundle>("Level_1_tiles")
             .add_system_set(level_set(AppState::RoundLocal))
-            .add_system_set(level_set(AppState::RoundOnline));
+            .add_system_set(level_set(AppState::RoundOnline))
+            .insert_resource(LevelSelection::Index(0));
     }
 }

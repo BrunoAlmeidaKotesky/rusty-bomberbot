@@ -18,7 +18,7 @@ pub fn init_window_plugin() -> WindowPlugin {
     WindowPlugin {
         window: WindowDescriptor {
             title: "Rust Bomberbot".to_string(),
-            fit_canvas_to_parent: false,
+            fit_canvas_to_parent: true,
             present_mode: PresentMode::AutoVsync,
             ..default()
         },

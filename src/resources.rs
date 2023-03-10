@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use bevy_asset_loader::prelude::AssetCollection;
+use bevy_ecs_ldtk::prelude::LdtkEntity;
 use bevy_ggrs::ggrs::PlayerHandle;
 use matchbox_socket::WebRtcSocket;
 
@@ -38,8 +39,18 @@ pub struct FontAssets {
     pub default_font: Handle<Font>,
 }
 
-#[derive(Resource)]
+#[derive(Resource, Debug)]
 pub struct LocalHandles {
     pub handles: Vec<PlayerHandle>,
     pub lobby_id: Option<LobbyID>
+}
+
+
+//Not exactly resources
+
+#[derive(Bundle, LdtkEntity)]
+pub struct LDTKBundle {
+    #[sprite_sheet_bundle]
+    #[bundle]
+    sprite_bundle: SpriteSheetBundle,
 }
