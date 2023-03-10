@@ -24,15 +24,12 @@ pub struct GameTextures {
     pub explosion: Handle<TextureAtlas>,
 }
 
-#[derive(Resource)]
-pub struct LocalPlayerHandle(pub usize);
-
-#[derive(Resource)]
+#[derive(Resource, Debug)]
 pub struct ConnectData {
     pub lobby_id: String,
 }
 
-#[derive(Resource)]
+#[derive(Resource, Debug, Clone)]
 pub struct LobbyID(pub String);
 
 #[derive(AssetCollection, Resource)]
@@ -44,4 +41,5 @@ pub struct FontAssets {
 #[derive(Resource)]
 pub struct LocalHandles {
     pub handles: Vec<PlayerHandle>,
+    pub lobby_id: Option<LobbyID>
 }

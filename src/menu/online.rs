@@ -3,11 +3,13 @@ use crate::{
     components::{AppState},
 };
 use bevy::prelude::*;
+use rand::{distributions::Alphanumeric, Rng}; // 0.8
+
 
 #[derive(Component)]
 pub struct MenuOnlineUI;
 
-#[derive(Component)]
+#[derive(Component, Debug)]
 pub enum MenuOnlineBtn {
     LobbyMatch,
     QuickMatch,
@@ -165,7 +167,7 @@ pub fn setup_ui(mut commands: Commands, font_assets: Res<FontAssets>) {
 pub fn update_lobby_id(
     mut char_evr: EventReader<ReceivedCharacter>,
     keys: Res<Input<KeyCode>>,
-    mut lobby_id: ResMut<LobbyID>,
+    mut lobby_id: ResMut<LobbyID>
 ) {
     let lid = &mut lobby_id.0;
     for ev in char_evr.iter() {

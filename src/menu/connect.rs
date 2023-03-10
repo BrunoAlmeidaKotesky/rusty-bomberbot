@@ -5,7 +5,7 @@ use matchbox_socket::WebRtcSocket;
 
 use crate::{
     constants::MAX_PLAYERS,
-    resources::{ConnectData, FontAssets, LocalHandles, Session},
+    resources::{ConnectData, FontAssets, LocalHandles, Session, LobbyID},
     components::{AppState, GGRSConfig},
 };
 
@@ -34,6 +34,7 @@ pub fn update_matchbox_socket(
     commands: Commands,
     mut state: ResMut<State<AppState>>,
     mut session: ResMut<Session>,
+    lobby_id: Option<Res<LobbyID>>
 ) {
     let Some(socket) = &mut session.socket else {
         // If there is no socket we've already started the game
@@ -43,7 +44,7 @@ pub fn update_matchbox_socket(
     if socket.players().len() >= MAX_PLAYERS {
         // take the socket
         let socket = session.socket.take().unwrap();
-        create_ggrs_session(commands, socket);
+        create_ggrs_session(commands, socket, lobby_id);
         state
             .set(AppState::RoundOnline)
             .expect("Could not change state.");
@@ -146,7 +147,7 @@ pub fn cleanup_ui(query: Query<Entity, With<MenuConnectUI>>, mut commands: Comma
     }
 }
 
-fn create_ggrs_session(mut commands: Commands, socket: WebRtcSocket) {
+fn create_ggrs_session(mut commands: Commands, socket: WebRtcSocket, lobby_id: Option<Res<LobbyID>>) {
     // create a new ggrs session
     let mut session_build = SessionBuilder::<GGRSConfig>::new()
         .with_num_players(MAX_PLAYERS)
@@ -170,7 +171,8 @@ fn create_ggrs_session(mut commands: Commands, socket: WebRtcSocket) {
     let session = session_build
         .start_p2p_session(socket)
         .expect("Session could not be created.");
-    //commands.insert_resource(session);
-    commands.insert_resource(LocalHandles { handles });
+    let lobby_id = lobby_id.map(|res| (*res).clone());
+    info!("Connected to lobby Id: {:?}", lobby_id);
+    commands.insert_resource(LocalHandles { handles , lobby_id });
     commands.insert_resource(SessionType::P2PSession(session));
 }

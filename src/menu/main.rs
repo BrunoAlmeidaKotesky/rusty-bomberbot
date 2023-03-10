@@ -1,6 +1,6 @@
 use crate::{
     constants::MAX_PLAYERS,
-    resources::{FontAssets, LocalHandles},
+    resources::{FontAssets, LocalHandles, LobbyID},
     components::{AppState, GGRSConfig},
 };
 use bevy::prelude::*;
@@ -127,7 +127,7 @@ pub fn cleanup_ui(query: Query<Entity, With<MenuMainUI>>, mut commands: Commands
 }
 
 fn create_synctest_session(commands: &mut Commands) {
-    let mut sess_build = SessionBuilder::<GGRSConfig>::new()
+    let mut session_build = SessionBuilder::<GGRSConfig>::new()
         .with_num_players(MAX_PLAYERS)
         .with_max_prediction_window(10)
         .with_fps(60)
@@ -136,15 +136,16 @@ fn create_synctest_session(commands: &mut Commands) {
         .with_check_distance(2);
 
     for i in 0..2 {
-        sess_build = sess_build
+        session_build = session_build
             .add_player(PlayerType::Local, i)
             .expect("Could not add local player");
     }
 
-    let session = sess_build.start_synctest_session().expect("");
+    let session = session_build.start_synctest_session().expect("");
 
     commands.insert_resource(SessionType::SyncTestSession(session));
     commands.insert_resource(LocalHandles {
         handles: (0..2).collect(),
+        lobby_id: Some(LobbyID("local".to_owned()))
     });
 }

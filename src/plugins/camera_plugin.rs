@@ -1,5 +1,5 @@
 use bevy::{prelude::*, window::PresentMode};
-use crate::{resources::{WinSize, LocalPlayerHandle}, components::Player};
+use crate::{resources::{WinSize, LocalHandles, LobbyID}, components::Player};
 
 pub fn toggle_vsync(input: Res<Input<KeyCode>>, mut windows: ResMut<Windows>) {
     if input.just_pressed(KeyCode::V) {
@@ -17,8 +17,8 @@ pub fn toggle_vsync(input: Res<Input<KeyCode>>, mut windows: ResMut<Windows>) {
 pub fn init_window_plugin() -> WindowPlugin {
     WindowPlugin {
         window: WindowDescriptor {
-            title: "Rust Bomberboy".to_string(),
-            fit_canvas_to_parent: true,
+            title: "Rust Bomberbot".to_string(),
+            fit_canvas_to_parent: false,
             present_mode: PresentMode::AutoVsync,
             ..default()
         },
@@ -48,24 +48,49 @@ pub fn setup_window_system(
 }
 
 pub fn camera_follow_system(
-    player_handle: Option<Res<LocalPlayerHandle>>,
+    player_handle: Option<Res<LocalHandles>>,
+    current_lobby: Option<Res<LobbyID>>,
     player_query: Query<(&Player, &Transform)>,
     mut camera_query: Query<&mut Transform, (With<Camera>, Without<Player>)>,
 ) {
-    let player_handle = match player_handle {
-        Some(handle) => handle.0,
+
+    let (player_handle, lobby_id) = match player_handle {
+        Some(handle) => {
+            (handle.handles.first().unwrap().clone(), handle.lobby_id.clone())
+        },
         None => {
             return; // Session hasn't started yet
         }
     };
 
+    //This should only work if the player is in the same lobby as the camera
+
+    let current_lobby = match current_lobby {
+        Some(ref lobby) => lobby.to_owned(),
+        None => {
+            return; // Session hasn't started yet
+        }
+    };
+
+    let lobby_id = match lobby_id {
+        Some(ref id) => id,
+        None => {
+            info!("Camera should not follow player (lobby_id is None)");
+            return; // Session hasn't started yet
+        }
+    };
+
     for (player, player_transform) in player_query.iter() {
-        if player.handle != player_handle {
+        if player.handle != player_handle && current_lobby.0 != lobby_id.0 {
+            //"Camera should not follow player ({}!= {})", player.handle, current_lobby.0);
+            continue;
+        }
+        else if  player.handle != player_handle && current_lobby.0 == lobby_id.0 {
+            //"Camera should not follow different player from the same lobby
             continue;
         }
 
         let player_pos = player_transform.translation;
-
         for mut transform in camera_query.iter_mut() {
             transform.translation.x = player_pos.x;
             transform.translation.y = player_pos.y;

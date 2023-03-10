@@ -13,24 +13,26 @@ use bevy::{
     diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin},
     prelude::*
 };
-use bevy_ecs_ldtk::prelude::*;
-use plugins::{connections_plugin, asset_plugin, ggrsp_plugin::init_ggrsp_plugin, camera::CameraPlugin};
+use plugins::{
+    connections_plugin, 
+    asset_plugin, 
+    ggrsp_plugin::init_ggrsp_plugin, 
+    camera_plugin::CameraPlugin,
+    levels_plugin::LevelsPlugin
+};
 
 fn main() {
     let mut app = App::new();
 
     init_ggrsp_plugin(&mut app);
     app.add_plugin(CameraPlugin)
-        .add_startup_system(load_ldtk_levels)
         .add_plugin(asset_plugin::AssetLoadingPlugin)
-        .add_plugin(LdtkPlugin)
-        .insert_resource(LevelSelection::Index(0))
-        .register_ldtk_entity::<LDTKBundle>("MyEntityIdentifier")
         .add_plugin(LogDiagnosticsPlugin {
-            wait_duration: Duration::from_secs(10),
+            wait_duration: Duration::from_secs(4 * 60),
             debug: false,
             filter: None,
         })
+        .add_plugin(LevelsPlugin)
         .add_plugin(FrameTimeDiagnosticsPlugin::default())
         .add_plugin(connections_plugin::MainMenuPlugin)
         .add_plugin(connections_plugin::ConnectMenuPlugin)
@@ -38,18 +40,4 @@ fn main() {
         .add_plugin(connections_plugin::LocalMatchPlugin)
         .add_plugin(connections_plugin::OnlineMatchPlugin)
         .run();
-}
-
-fn load_ldtk_levels(mut commands: Commands, assets: Res<AssetServer>) {
-    commands.spawn(LdtkWorldBundle {
-        ldtk_handle: assets.load("levels/Bomberboy.ldtk"),
-        ..default()
-    });
-}
-
-#[derive(Bundle, LdtkEntity)]
-pub struct LDTKBundle {
-    #[sprite_sheet_bundle]
-    #[bundle]
-    sprite_bundle: SpriteSheetBundle,
 }

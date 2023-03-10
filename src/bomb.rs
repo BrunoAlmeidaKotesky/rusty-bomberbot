@@ -21,7 +21,7 @@ pub fn player_place_bomb_system(
             continue;
         }
         if input & INPUT_FIRE != 0 {
-            for mut slot in bomb_bag.slots.iter() {
+            for slot in bomb_bag.slots.iter() {
                 if slot.bomb.is_none() {
                     //Add a new bomb
                     commands.spawn((

@@ -1,5 +1,7 @@
+use std::ops::Range;
+
 use crate::checksum::Checksum;
-use crate::components::{BombBag, Player, RoundEntity, GGRSConfig};
+use crate::components::{BombBag, GGRSConfig, Player, RoundEntity};
 use crate::constants::MAX_PLAYERS;
 use crate::input::control_direction;
 use crate::resources::GameTextures;
@@ -9,17 +11,29 @@ use bevy_ggrs::ggrs::InputStatus;
 use bevy_ggrs::PlayerInputs;
 use bevy_ggrs::{Rollback, RollbackIdProvider};
 
+fn player_color(index: usize) -> Color {
+    match index {
+        0 => Color::rgb(1., 0., 0.),
+        1 => Color::rgb(0., 1., 0.),
+        _ => Color::rgb(0.27, 0.27, 0.27),
+    }
+}
 pub fn spawn_players(
     mut commands: Commands,
     mut rip: ResMut<RollbackIdProvider>,
     game_texture: Res<GameTextures>,
 ) {
-    for handle in 0..MAX_PLAYERS {
+    const RANGE: Range<usize> = 0..MAX_PLAYERS;
+    for (handle, index) in RANGE.enumerate() {
         commands.spawn((
             SpriteBundle {
                 transform: Transform {
                     translation: Vec3::new(10., 0., 100.),
                     scale: Vec3::new(0.05, 0.05, 0.5),
+                    ..default()
+                },
+                sprite: Sprite {
+                    color: player_color(index),
                     ..default()
                 },
                 texture: game_texture.player.clone(),
