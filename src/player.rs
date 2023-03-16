@@ -28,7 +28,7 @@ pub fn spawn_players(
         commands.spawn((
             SpriteBundle {
                 transform: Transform {
-                    translation: Vec3::new(10., 0., 100.),
+                    translation: Vec3::new(0., 0., 100.),
                     scale: Vec3::new(0.05, 0.05, 0.5),
                     ..default()
                 },

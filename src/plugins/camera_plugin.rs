@@ -1,7 +1,14 @@
-use bevy::{prelude::*, window::PresentMode};
-use crate::{resources::{WinSize, LocalHandles, LobbyID}, components::Player};
+use bevy::{prelude::*, window::PresentMode, input::mouse::MouseWheel};
+use crate::{resources::{WinSize, LocalHandles, LobbyID, DebugConfig, CameraZoomConfig}, components::Player};
 
-pub fn toggle_vsync(input: Res<Input<KeyCode>>, mut windows: ResMut<Windows>) {
+pub fn toggle_vsync(
+    input: Res<Input<KeyCode>>, 
+    mut windows: ResMut<Windows>,
+    debug_config: Res<DebugConfig>
+) {
+    if !debug_config.enabled {
+        return;
+    }
     if input.just_pressed(KeyCode::V) {
         let window = windows.primary_mut();
 
@@ -98,6 +105,31 @@ pub fn camera_follow_system(
     }
 }
 
+fn camera_zoom_system(
+    debug_config: Res<DebugConfig>,
+    mut ev_scroll: EventReader<MouseWheel>,
+    config: Res<CameraZoomConfig>,
+    mut query: Query<&mut Transform, With<Camera>>,
+) {
+    if !debug_config.enabled {
+        return;
+    }
+
+    let mut scroll = 0.0;
+    for event in ev_scroll.iter() {
+        scroll += event.y;
+    }
+
+    if scroll.abs() > f32::EPSILON {
+        for mut transform in query.iter_mut() {
+            let mut scale = transform.scale.x + scroll * config.scroll_speed;
+            scale = scale.clamp(config.min_scale, config.max_scale);
+
+            transform.scale = Vec3::new(scale, scale, 1.0);
+        }
+    }
+}
+
 pub struct CameraPlugin;
 
 impl Plugin for CameraPlugin {
@@ -108,8 +140,17 @@ impl Plugin for CameraPlugin {
                 .set(init_window_plugin())
                 .set(ImagePlugin::default_nearest()),
         )
+        .insert_resource(DebugConfig {
+            enabled: true, // Defina como 'false' ao construir uma versão de lançamento
+        })
+        .insert_resource(CameraZoomConfig {
+            scroll_speed: 0.1,
+            min_scale: 0.1,
+            max_scale: 2.0,
+        })
         .add_startup_system(setup_window_system)
         .add_system(camera_follow_system)
+        .add_system(camera_zoom_system)
         .add_system(toggle_vsync);
     }
 }

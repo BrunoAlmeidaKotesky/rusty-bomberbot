@@ -45,6 +45,17 @@ pub struct LocalHandles {
     pub lobby_id: Option<LobbyID>
 }
 
+#[derive(Resource, Debug)]
+pub struct DebugConfig {
+    pub enabled: bool,
+}
+
+#[derive(Resource, Debug)]
+pub struct CameraZoomConfig {
+    pub scroll_speed: f32,
+    pub min_scale: f32,
+    pub max_scale: f32,
+}
 
 //Not exactly resources
 
