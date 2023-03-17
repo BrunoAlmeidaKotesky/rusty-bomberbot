@@ -1,7 +1,8 @@
 use std::ops::Range;
 
 use crate::checksum::Checksum;
-use crate::components::{BombBag, GGRSConfig, Player, RoundEntity};
+use crate::components::game_elements::{BombBag,Player};
+use crate::components::online::{RoundEntity, GGRSConfig, };
 use crate::constants::MAX_PLAYERS;
 use crate::input::control_direction;
 use crate::resources::GameTextures;

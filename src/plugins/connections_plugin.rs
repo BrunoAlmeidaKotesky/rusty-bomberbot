@@ -1,5 +1,5 @@
 use crate::{
-    components::{AppState, GGRSConfig, RoundEntity},
+    components::online::{AppState, GGRSConfig, RoundEntity},
     menu::{connect, online, main},
     player::spawn_players,
     resources::{LocalHandles, Session}, bomb::{explosion_animation_system, explosion_to_spawn_system},

@@ -1,7 +1,7 @@
 use crate::{
     constants::MAX_PLAYERS,
     resources::{FontAssets, LocalHandles, LobbyID},
-    components::{AppState, GGRSConfig},
+    components::{online::{AppState, GGRSConfig}},
 };
 use bevy::prelude::*;
 use bevy_ggrs::{

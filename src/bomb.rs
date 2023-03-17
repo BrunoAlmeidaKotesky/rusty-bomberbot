@@ -1,5 +1,8 @@
 use crate::{
-    components::{Bomb, BombBag, Explosion, ExplosionTimer, ExplosionToSpawn, FuseTime, Player, GGRSConfig},
+    components::{
+        game_elements::{Bomb, BombBag, Explosion, ExplosionTimer, ExplosionToSpawn, FuseTime, Player}, 
+        online::GGRSConfig
+    },
     constants::{INPUT_FIRE},
     resources::GameTextures
 };

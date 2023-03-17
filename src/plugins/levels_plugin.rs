@@ -1,7 +1,8 @@
 use std::collections::HashSet;
 
 use crate::{
-    components::{AppState, WallDetection, ColliderWrapper, WallSensor, SensorWrapper, ActiveEventsWrapper}
+    components::online::{AppState},
+    components::collidable::{WallDetection, ColliderWrapper, WallSensor, SensorWrapper, ActiveEventsWrapper}
 };
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;

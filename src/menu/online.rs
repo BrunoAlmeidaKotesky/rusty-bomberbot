@@ -1,10 +1,8 @@
 use crate::{
     resources::{ConnectData, FontAssets, LobbyID},
-    components::{AppState},
+    components::{online::AppState},
 };
 use bevy::prelude::*;
-use rand::{distributions::Alphanumeric, Rng}; // 0.8
-
 
 #[derive(Component)]
 pub struct MenuOnlineUI;

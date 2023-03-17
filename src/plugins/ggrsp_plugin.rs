@@ -1,6 +1,6 @@
 use crate::{
     checksum::{checksum_players_system, Checksum},
-    components::GGRSConfig,
+    components::online::GGRSConfig,
     input,
     player::move_players,
 };

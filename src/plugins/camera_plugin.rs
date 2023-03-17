@@ -1,10 +1,13 @@
-use bevy::{prelude::*, window::PresentMode, input::mouse::MouseWheel};
-use crate::{resources::{WinSize, LocalHandles, LobbyID, DebugConfig, CameraZoomConfig}, components::Player};
+use crate::{
+    components::game_elements::{Player},
+    resources::{CameraZoomConfig, DebugConfig, LobbyID, LocalHandles, WinSize},
+};
+use bevy::{input::mouse::MouseWheel, prelude::*, window::PresentMode};
 
 pub fn toggle_vsync(
-    input: Res<Input<KeyCode>>, 
+    input: Res<Input<KeyCode>>,
     mut windows: ResMut<Windows>,
-    debug_config: Res<DebugConfig>
+    debug_config: Res<DebugConfig>,
 ) {
     if !debug_config.enabled {
         return;
@@ -33,10 +36,7 @@ pub fn init_window_plugin() -> WindowPlugin {
     }
 }
 
-pub fn setup_window_system(
-    mut commands: Commands,
-    mut windows: ResMut<Windows>
-) {
+pub fn setup_window_system(mut commands: Commands, mut windows: ResMut<Windows>) {
     //Setup camera:
     let window = windows.get_primary_mut().unwrap();
     let (win_w, win_h) = (window.width(), window.height());
@@ -50,8 +50,8 @@ pub fn setup_window_system(
     };
     commands.spawn(camera);
 
-	let win_size = WinSize { w: win_w, h: win_h };
-	commands.insert_resource(win_size);
+    let win_size = WinSize { w: win_w, h: win_h };
+    commands.insert_resource(win_size);
 }
 
 pub fn camera_follow_system(
@@ -60,11 +60,11 @@ pub fn camera_follow_system(
     player_query: Query<(&Player, &Transform)>,
     mut camera_query: Query<&mut Transform, (With<Camera>, Without<Player>)>,
 ) {
-
     let (player_handle, lobby_id) = match player_handle {
-        Some(handle) => {
-            (handle.handles.first().unwrap().clone(), handle.lobby_id.clone())
-        },
+        Some(handle) => (
+            handle.handles.first().unwrap().clone(),
+            handle.lobby_id.clone(),
+        ),
         None => {
             return; // Session hasn't started yet
         }
@@ -91,8 +91,7 @@ pub fn camera_follow_system(
         if player.handle != player_handle && current_lobby.0 != lobby_id.0 {
             //"Camera should not follow player ({}!= {})", player.handle, current_lobby.0);
             continue;
-        }
-        else if  player.handle != player_handle && current_lobby.0 == lobby_id.0 {
+        } else if player.handle != player_handle && current_lobby.0 == lobby_id.0 {
             //"Camera should not follow different player from the same lobby
             continue;
         }
@@ -134,8 +133,7 @@ pub struct CameraPlugin;
 
 impl Plugin for CameraPlugin {
     fn build(&self, app: &mut App) {
-        app
-        .add_plugins(
+        app.add_plugins(
             DefaultPlugins
                 .set(init_window_plugin())
                 .set(ImagePlugin::default_nearest()),

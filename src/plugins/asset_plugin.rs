@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_asset_loader::prelude::{LoadingStateAppExt, LoadingState};
 
-use crate::{components::AppState, resources::{FontAssets, GameTextures}};
+use crate::{components::online::AppState, resources::{FontAssets, GameTextures}};
 
 pub struct AssetLoadingPlugin;
 
