@@ -11,8 +11,9 @@ rand = "0.8"
 bevy_ggrs = {version = "0.11", features = ["wasm-bindgen"]}
 matchbox_socket = { version = "0.5.0", features = ["ggrs-socket"] }
 bevy_ecs_tilemap = { version = "0.9.0" }
-bevy_ecs_ldtk = { version = "0.5"}
+bevy_ecs_ldtk = { version = "0.5", features = ["atlas"]}
 bevy_asset_loader = { version = "0.14.0" }
+bevy_rapier2d = "0.21.0"
 
 [workspace]
 resolver = "2" # Important! wgpu/Bevy needs this!
@@ -24,6 +25,9 @@ opt-level = 1
 # Enable high optimizations for dependencies (incl. Bevy), but not for our code:
 [profile.dev.package."*"]
 opt-level = 3
+
+[features]
+default = ["bevy_ecs_ldtk/atlas"]
 
 [target.wasm32-unknown-unknown]
 runner = "wasm-server-runner"

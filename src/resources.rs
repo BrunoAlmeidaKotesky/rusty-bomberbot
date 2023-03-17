@@ -23,6 +23,8 @@ pub struct GameTextures {
     pub player_bomb: Handle<Image>,
     #[asset(path = "textures/explosion.png")]
     pub explosion: Handle<TextureAtlas>,
+    #[asset(path = "textures/default_level.png")]
+    pub default_level: Handle<Image>,
 }
 
 #[derive(Resource, Debug)]

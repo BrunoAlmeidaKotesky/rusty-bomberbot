@@ -1,61 +1,54 @@
+use std::collections::HashSet;
+
 use crate::{
-    components::{AppState, Player},
-    resources::{LDTKBundle, LobbyID, LocalHandles},
+    components::{AppState, WallDetection, ColliderWrapper, WallSensor, SensorWrapper, ActiveEventsWrapper}
 };
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
-use rand::seq::SliceRandom;
-use std::collections::HashSet;
-
-const LEVEL_IIDS: [&str; 2] = [
-    "fddf20c0-9f30-11ed-9d6b-9fce45576d40",
-    "0780a240-9f30-11ed-b0b1-4b64fc366061",
-];
+use bevy_rapier2d::prelude::*;
 
 fn load_ldtk_levels(mut commands: Commands, assets: Res<AssetServer>) {
     info!("Loading ldtk levels");
-    const MAP_SIZE: u32 = 41;
-    const GRID_WIDTH: f32 = 0.05;
-    // Horizontal lines
-    for i in 0..=MAP_SIZE {
-        commands.spawn(SpriteBundle {
-            transform: Transform::from_translation(Vec3::new(
-                0.,
-                i as f32 - MAP_SIZE as f32 / 2.,
-                10.,
-            )),
-            sprite: Sprite {
-                color: Color::rgb(0.27, 0.27, 0.27),
-                custom_size: Some(Vec2::new(MAP_SIZE as f32, GRID_WIDTH)),
-                ..default()
-            },
-            ..default()
-        });
-    }
-
-    // Vertical lines
-    for i in 0..=MAP_SIZE {
-        commands.spawn(SpriteBundle {
-            transform: Transform::from_translation(Vec3::new(
-                i as f32 - MAP_SIZE as f32 / 2.,
-                0.,
-                1.,
-            )),
-            sprite: Sprite {
-                color: Color::rgb(0.27, 0.27, 0.27),
-                custom_size: Some(Vec2::new(GRID_WIDTH, MAP_SIZE as f32)),
-                ..default()
-            },
-            ..default()
-        });
-    }
-    let iids: HashSet<String> = LEVEL_IIDS.into_iter().map(|s| s.to_string()).collect();
     commands.spawn(LdtkWorldBundle {
         ldtk_handle: assets.load("levels/Bomberboy.ldtk"),
-        level_set: LevelSet { iids },
-        transform: Transform::from_xyz(1., -1., 111.),
+        transform: Transform {
+            translation: Vec3::new(0., 0., 11.),
+            scale: Vec3::new(0.16, 0.16, 1.),
+            ..default()
+        },
         ..default()
     });
+}
+
+
+pub fn spawn_ground_sensor(
+    mut commands: Commands,
+    detect_ground_for: Query<(Entity, &ColliderWrapper), Added<WallDetection>>,
+) {
+    for (entity, shape) in &detect_ground_for {
+        if let Some(cuboid) = shape.0.as_cuboid() {
+            let half_extends = cuboid.half_extents();
+            let half_extents_x = half_extends.x;
+            let half_extents_y = half_extends.y;
+            let detector_shape: ColliderWrapper  = Collider::cuboid(half_extents_x / 2.0, 2.).into();
+
+            let sensor_translation = Vec3::new(0., -half_extents_y, 0.);
+
+            commands.entity(entity).with_children(|builder| {
+                builder.spawn((
+                    ActiveEventsWrapper::from(ActiveEvents::COLLISION_EVENTS),
+                    detector_shape,
+                    SensorWrapper::from(Sensor),
+                    Transform::from_translation(sensor_translation),
+                    GlobalTransform::default(),
+                    WallSensor {
+                        wall_detection_entity: entity,
+                        intersecting_wall_entities: HashSet::new()
+                    }
+                ));
+            });
+        }
+    }
 }
 
 
@@ -68,28 +61,8 @@ impl Plugin for LevelsPlugin {
         };
 
         app.add_plugin(LdtkPlugin)
-            .insert_resource(LdtkSettings {
-                // By default, levels are just spawned at the origin of the world.
-                level_spawn_behavior: LevelSpawnBehavior::UseZeroTranslation,
-                ..default()
-            })
+            .insert_resource(LevelSelection::Index(0))
             .add_system_set(level_set(AppState::RoundLocal))
-            .add_system_set(level_set(AppState::RoundOnline))
-            .add_system(toggle_levels);
-    }
-}
-
-fn toggle_levels(input: Res<Input<KeyCode>>, mut level_sets: Query<&mut LevelSet>) {
-    if input.just_pressed(KeyCode::Space) {
-        let mut rng = rand::thread_rng();
-        let level_to_toggle = LEVEL_IIDS.choose(&mut rng).unwrap().to_string();
-
-        let mut level_set = level_sets.single_mut();
-        if level_set.iids.contains(&level_to_toggle) {
-            level_set.iids.remove(&level_to_toggle);
-        } else {
-            info!("Toggling level {}", level_to_toggle);
-            level_set.iids.insert(level_to_toggle);
-        }
+            .add_system_set(level_set(AppState::RoundOnline));
     }
 }

@@ -29,7 +29,7 @@ pub fn spawn_players(
             SpriteBundle {
                 transform: Transform {
                     translation: Vec3::new(0., 0., 100.),
-                    scale: Vec3::new(0.05, 0.05, 0.5),
+                    scale: Vec3::new(0.10, 0.10, 0.10),
                     ..default()
                 },
                 sprite: Sprite {
