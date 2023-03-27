@@ -1,5 +1,13 @@
-use bevy::{prelude::{Component, Vec3}, time::{Timer, TimerMode}};
-
+use bevy::{
+    prelude::{Component, Vec3}, 
+    time::{Timer, TimerMode}, 
+    sprite::SpriteBundle,
+    ecs::bundle::Bundle
+};
+use bevy_ecs_ldtk::Worldly;
+use bevy_ggrs::Rollback;
+use crate::checksum::Checksum;
+use super::{collidable::{ColliderBundle}, online::RoundEntity};
 
 #[derive(Component)]
 pub struct FuseTime {
@@ -53,4 +61,18 @@ impl Default for BombBag {
             ],
         }
     }
+}
+
+#[derive(Bundle)]
+pub struct PlayerBundle {
+    pub player_sprite: SpriteBundle,
+    pub player: Player,
+    pub check_sum: Checksum,
+    pub rollback: Rollback,
+    pub round_entity: RoundEntity,
+    //#[worldly]
+    pub worldly: Worldly,
+    //#[from_entity_instance]
+    #[bundle]
+    pub collider_bundle: ColliderBundle,
 }

@@ -1,0 +1,16 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Bevy WebAssembly",
+            "type": "lldb",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "program": "${workspaceFolder}/target/wasm32-unknown-unknown/release/<sua-aplicação>.wasm",
+            "args": [],
+            "env": {},
+            "sourceMaps": true,
+            "preLaunchTask": "cargo build --release --target wasm32-unknown-unknown"
+        }
+    ]
+}

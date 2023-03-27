@@ -1,13 +1,15 @@
 use std::ops::Range;
 
 use crate::checksum::Checksum;
-use crate::components::game_elements::{BombBag,Player};
+use crate::components::collidable::ColliderBundle;
+use crate::components::game_elements::{Player, PlayerBundle};
 use crate::components::online::{RoundEntity, GGRSConfig, };
 use crate::constants::MAX_PLAYERS;
 use crate::input::control_direction;
 use crate::resources::GameTextures;
 use bevy::math::Vec3Swizzles;
 use bevy::prelude::*;
+use bevy_ecs_ldtk::Worldly;
 use bevy_ggrs::ggrs::InputStatus;
 use bevy_ggrs::PlayerInputs;
 use bevy_ggrs::{Rollback, RollbackIdProvider};
@@ -19,6 +21,7 @@ fn player_color(index: usize) -> Color {
         _ => Color::rgb(0.27, 0.27, 0.27),
     }
 }
+
 pub fn spawn_players(
     mut commands: Commands,
     mut rip: ResMut<RollbackIdProvider>,
@@ -26,8 +29,8 @@ pub fn spawn_players(
 ) {
     const RANGE: Range<usize> = 0..MAX_PLAYERS;
     for (handle, index) in RANGE.enumerate() {
-        commands.spawn((
-            SpriteBundle {
+        let player_bundle = PlayerBundle {
+            player_sprite: SpriteBundle {
                 transform: Transform {
                     translation: Vec3::new(0., 0., 100.),
                     scale: Vec3::new(0.10, 0.10, 0.10),
@@ -40,12 +43,14 @@ pub fn spawn_players(
                 texture: game_texture.player.clone(),
                 ..default()
             },
-            Player { handle },
-            BombBag::default(),
-            Checksum::default(),
-            Rollback::new(rip.next_id()),
-            RoundEntity,
-        ));
+            player: Player { handle },
+            check_sum: Checksum::default(),
+            rollback: Rollback::new(rip.next_id()),
+            round_entity: RoundEntity,
+            worldly: Worldly::default(),
+            collider_bundle: ColliderBundle::default()
+        };
+        commands.spawn(player_bundle);
     }
 }
 
